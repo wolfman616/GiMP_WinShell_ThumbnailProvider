@@ -129,7 +129,7 @@ IFACEMETHODIMP CGimpThumbProvider::Initialize(LPCWSTR pszFilePath, DWORD grfMode
         string1.replace(int4 - 4, 4, string3);
         // std::ifstream infile(string1.c_str());
         BOOL HAR = 0;
-        unsigned stim = 1;
+        unsigned stime = 1;
         void sleep(unsigned stime);
         //  while(HAR != 1) {
        //     void sleep(unsigned stime);
