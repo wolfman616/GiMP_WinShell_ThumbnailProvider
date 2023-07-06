@@ -41,13 +41,13 @@ template <class T> void SafeRelease(T** ppT) {
 
 //    Using Process isolation override.
 //    Implementing IInitializeWithFile to work toward being hosted in an un-isolated Explorer process *, promoting succesful Spaghetti-like nature, Thumbnail & Preview.
-class CRecipeThumbProvider : public IInitializeWithFile, public IThumbnailProvider {
+class CGimpThumbProvider : public IInitializeWithFile, public IThumbnailProvider {
   public:
-    CRecipeThumbProvider() : _cRef(1), _pStream(NULL) {
+    CGimpThumbProvider() : _cRef(1), _pStream(NULL) {
     }
 
 //  Release sequence.
-    virtual ~CRecipeThumbProvider() {
+    virtual ~CGimpThumbProvider() {
         if(_pStream) {
             _pStream->Release();
         }
@@ -55,8 +55,8 @@ class CRecipeThumbProvider : public IInitializeWithFile, public IThumbnailProvid
 //  IUnknown
     IFACEMETHODIMP QueryInterface(REFIID riid, void** ppv) {   
         static const QITAB qit[] = {
-            QITABENT(CRecipeThumbProvider, IInitializeWithFile),
-            QITABENT(CRecipeThumbProvider, IThumbnailProvider),
+            QITABENT(CGimpThumbProvider, IInitializeWithFile),
+            QITABENT(CGimpThumbProvider, IThumbnailProvider),
             { 0 },
         }; return QISearch(this, qit, riid, ppv);
     }
@@ -85,7 +85,7 @@ private: //HRESULT _LoadXMLDocument( IXMLDOMDocument **ppXMLDoc);
 };
 
 HRESULT CRecipeThumbProvider_CreateInstance(REFIID riid, void** ppv) {
-    CRecipeThumbProvider* pNew= new (std::nothrow) CRecipeThumbProvider();
+    CGimpThumbProvider* pNew= new (std::nothrow) CGimpThumbProvider();
     HRESULT hr= pNew ? S_OK : E_OUTOFMEMORY;
     if(SUCCEEDED(hr)) {
         hr= pNew->QueryInterface(riid, ppv);
@@ -94,7 +94,7 @@ HRESULT CRecipeThumbProvider_CreateInstance(REFIID riid, void** ppv) {
 }
 
 // IInitializeWithFile
-IFACEMETHODIMP CRecipeThumbProvider::Initialize(LPCWSTR pszFilePath, DWORD grfMode) { 
+IFACEMETHODIMP CGimpThumbProvider::Initialize(LPCWSTR pszFilePath, DWORD grfMode) { 
     HRESULT hr= E_UNEXPECTED;  // can only be inited once
     if (pszFilePath != NULL) {
         //  take a reference to the stream if we have not been inited yet
@@ -168,7 +168,7 @@ IFACEMETHODIMP CRecipeThumbProvider::Initialize(LPCWSTR pszFilePath, DWORD grfMo
 }
 
 //  Gets the base64-encoded string which represents the image.
-HRESULT CRecipeThumbProvider::_GetBase64EncodedImageString(UINT /* cx */, PWSTR* ppszResult) {
+HRESULT CGimpThumbProvider::_GetBase64EncodedImageString(UINT /* cx */, PWSTR* ppszResult) {
     *ppszResult= NULL;  //HRESULT hr = _LoadXMLDocument(&pXMLDoc);
     HRESULT hr4= E_UNEXPECTED;  // can only be inited once
     if(SUCCEEDED(hr4)) {
@@ -202,7 +202,7 @@ HRESULT CRecipeThumbProvider::_GetBase64EncodedImageString(UINT /* cx */, PWSTR*
 }
 
 // Decodes the base64-encoded string to a stream.
-HRESULT CRecipeThumbProvider::_GetStreamFromString(PCWSTR pszImageName, IStream** ppImageStream) {
+HRESULT CGimpThumbProvider::_GetStreamFromString(PCWSTR pszImageName, IStream** ppImageStream) {
     HRESULT hr = E_FAIL;
     pszImageName = (PCWSTR)WStrGlobal.c_str();
  //   MessageBoxW(NULL,pszImageName, L"_GetStreamFromString", MB_OK|MB_SETFOREGROUND);
@@ -294,7 +294,7 @@ HRESULT WICCreate32BitsPerPixelHBITMAP(IStream* pstm,UINT /* cx */,HBITMAP* phbm
 }
 
 // IThumbnailProvider
-IFACEMETHODIMP CRecipeThumbProvider::GetThumbnail(UINT cx,HBITMAP* phbmp,WTS_ALPHATYPE* pdwAlpha) {
+IFACEMETHODIMP CGimpThumbProvider::GetThumbnail(UINT cx,HBITMAP* phbmp,WTS_ALPHATYPE* pdwAlpha) {
     PWSTR pszBase64EncodedImageString;
     HRESULT hr= _GetBase64EncodedImageString(cx, &pszBase64EncodedImageString);
     if(SUCCEEDED(hr)) {
