@@ -12,7 +12,7 @@ I just freeballed re-writing the ThumbnailProvider class from scratch, as I was 
 ![image](https://github.com/wolfman616/GiMP_WinShell_ThumbnailProvider/assets/62726599/22672782-56d6-4df1-a1a5-0b9dbd5c8c6b)
 This Will need to be either changed or adhered to with regard to helper script. Sorry but this was the quicker of 2 evils.
 
-*Notable requirement of AHK script to help with the numerous files which need to be automated. IDeally this would all be taking place in memory within the handler in a methodical logical and sane manner but I wasnt immediately able to implement anything close to this, having spent about 40 hours up to this point.
+*Notable requirement of AHK script to help with the numerous files which need to be automated. IDeally this would all be taking place in memory within the handler in a methodical logical and sane manner but I wasnt immediately able to implement anything even remotely close to this, being a hobby and play-thing, by which of my own admission, having only spent a mere 40 hours getting it up to this point.
 
 I am still refining the ImageMagick command string to obtain the most desirable dquality to size trade off, which is proving un-trivial also.
 
