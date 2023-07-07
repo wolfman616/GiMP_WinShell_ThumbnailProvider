@@ -1,0 +1,37 @@
+INSTALLATION INSTRUCTIONS:
+
+This should work on most UNIX style systems:
+
+tar -xvf pngnq-s9-2.0.2.tar.gz
+cd pngnq-s9-2.0.2
+./configure
+make
+sudo make install
+
+If you are using gcc on a modern x86 system, you may get much better
+performance if you configure with:
+
+    ./configure CFLAGS="-O3 -msse -funroll-loops"
+
+instead.  
+
+Similar flags (to enable floating point SIMD operations and to enable loop
+unrolling) will probably be worthwhile on other compilers/architectures,
+assuming those optimizations aren't performed by default.
+
+If configure doesn't work, the dependencies are simple enough to just
+compile by hand:
+
+gcc -c rwpng.c
+gcc -c neuquant32.c
+...
+gcc -o pngnq-s9 pngnq.o neuquant32.o rwpng.o colorspace.o -lpng16 -lz 
+
+There may be warnings about various legacy practices; parts of the code
+are quite old and the orthodoxies of C and C compilers have changed a lot
+over the years.  
+
+
+
+apr-apr-apr@users.sourceforge.net
+
