@@ -19,10 +19,15 @@
 #include <sstream>
 #include <fstream>
 #include <stdio.h>
+#include <chrono>
+#include <thread>
 #include <locale>
 #include <string>
 #include <new>
 #include <codecvt>        // std::codecvt_utf8_utf16
+#include <sys/stat.h>
+#include <string>
+#include <fstream>
 using namespace std;
 
 std::wstring WStrGlobal;
@@ -94,77 +99,50 @@ HRESULT CRecipeThumbProvider_CreateInstance(REFIID riid, void** ppv) {
 }
 
 // IInitializeWithFile
-IFACEMETHODIMP CGimpThumbProvider::Initialize(LPCWSTR pszFilePath, DWORD grfMode) { 
-    HRESULT hr= E_UNEXPECTED;  // can only be inited once
-    if (pszFilePath != NULL) {
-        //  take a reference to the stream if we have not been inited yet
-       //  hr= pszFilePath->QueryInterface(&_pStream);
-      //  MessageBoxW(NULL, (LPCWSTR)pszFilePath, (LPCWSTR)L"SPIresult",MB_OK|MB_SETFOREGROUND);
-        unsigned int4 = 2;
+IFACEMETHODIMP CGimpThumbProvider::Initialize(LPCWSTR pszFilePath,DWORD grfMode) { 
+    HRESULT hr= E_UNEXPECTED;  //can only be inited once
+    if(pszFilePath != NULL) {
+        unsigned int4= 2;
         std::stringstream ass;
-        // string string1= WStrGlobal;
-        // string string2= ("\"" + string1 + "\"") ;
-      //  string string1="C:\\Script\\AHK\\__TESTS\\New folder\\0107.xcf";
-       //   std::string narrow = string4.to_bytes(pszFilePath);
-        std::wstring string4 = pszFilePath;
-        std::wstring_convert<std::codecvt_utf8<wchar_t>> conv1;
-        std::string string1 = conv1.to_bytes(string4);
-        std::cout << "UTF-8 conversion produced " << string1.size() << " bytes:\n";
-        // wide to UTF-16le
-        std::wstring_convert<std::codecvt_utf16<wchar_t, 0x10ffff, std::little_endian>> conv2;
-        //   std::string u16str = conv2.to_bytes(string4);
+         //std::string narrow = string4.to_bytes(pszFilePath);
+        std::wstring string4=pszFilePath;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>>conv1;
+        std::string string1= conv1.to_bytes(string4);
+         // std::cout<< "UTF-8 conversion produced "<<string1.size()<<" bytes:\n";
+         // wide to UTF-16le
+        std::wstring_convert<std::codecvt_utf16<wchar_t,0x10ffff,std::little_endian>>conv2;
+         //  std::string u16str = conv2.to_bytes(string4);
          // MessageBoxA(NULL, string1.c_str(), "u8",MB_OK|MB_SETFOREGROUND);
          // MessageBoxA(NULL, u16str.c_str(), "u16",MB_OK|MB_SETFOREGROUND);
-
-         //  std::cout << "UTF-16le conversion produced " << u16str.size() << " bytes:\n";
-        string string2 = "\"" + string1 + "\"";
-        LPCSTR command1 = "open";
-        //   LPCSTR LPFILE= "\"C:\\Script\\AHK\\__TESTS\\shell xcf to thumb (gimp.ahk\"";
-        LPCSTR LPFILE = "\"C:\\Script\\AHK\\z_ConTxt\\GIMP_XCF_Shell_Thumb_Helper.ahk\"";
-
-        LPCSTR lpParameters = string2.c_str();
-        ShellExecuteA(NULL, command1, LPFILE, lpParameters, NULL, 0);
+        string string2= "\"" + string1 + "\"";
+        LPCSTR command1= "open";
+        LPCSTR LPFILE= "\"C:\\Script\\AHK\\z_ConTxt\\GIMP_XCF_Shell_Thumb_Helper.ahk\"";
+        LPCSTR lpParameters= string2.c_str();
+        ShellExecuteA(NULL,command1,LPFILE,lpParameters,NULL,0);
         int4 = strlen(string1.c_str());
-        string string3 = ".txt";
-        string1.replace(int4 - 4, 4, string3);
-        // std::ifstream infile(string1.c_str());
-        BOOL HAR = 0;
-        unsigned stime = 1;
-        void sleep(unsigned stime);
-        //  while(HAR != 1) {
-       //     void sleep(unsigned stime);
-      //    HAR= (infile.good());
-     //   MessageBoxA(NULL,(LPCSTR)string1.c_str(),"harrr",MB_OK|MB_SETFOREGROUND);
-    //    }
-   //   MessageBoxA(NULL, (LPCSTR)string1.c_str(), "harrr",MB_OK|MB_SETFOREGROUND);
-        std::ifstream ifs(string1);
+        string string3= ".txt";
+        string1.replace(int4 -4,4,string3);
+        IStream* _pStream;
+        bool existtxt= 0;
+        struct stat buffer;
+        while (existtxt== 0) {
+            existtxt = (stat(string1.c_str(), &buffer)== 0);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        } std::ifstream ifs(string1);
         std::string content;
         content.assign((std::istreambuf_iterator<char>(ifs)),
-            (std::istreambuf_iterator<char>()));
-        IStream* _pStream;
-        void sleep(unsigned stime);
-        //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> content;
-       // std::string narrow = content.to_bytes(wide_utf16_source_string);
-      //  std
+        (std::istreambuf_iterator<char>()));
+        ifs.close();
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         CA2W ca2w(content.c_str());
-        WStrGlobal = ca2w;
-        std::wstring wFileName(string1.begin(), string1.end());
-        BOOL res = NULL;
-        //   MessageBoxW(NULL, WStrGlobal.c_str(), L"jizzy",MB_OK|MB_SETFOREGROUND);
-     //  ; while (res == 0) {
-            void sleep(unsigned stime);
-            res = DeleteFileA(string1.c_str());
-        if (res != 1) {
-            void sleep(unsigned stime);
-            res = DeleteFileA(string1.c_str());
+        CA2W ca3w(string1.c_str());
+        WStrGlobal= ca2w;
+        BOOL res= 0;
+        while (res== 0) {
+            res= DeleteFileW(ca3w);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
-          // MessageBoxA(NULL, (LPCSTR)res, "res",MB_OK|MB_SETFOREGROUND);
-
-    }
-
- //   }
-        return 1;
-    
+    } return 1;
 }
 
 //  Gets the base64-encoded string which represents the image.
