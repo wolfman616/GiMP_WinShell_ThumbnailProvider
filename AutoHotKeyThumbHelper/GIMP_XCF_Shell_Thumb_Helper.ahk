@@ -9,23 +9,27 @@ SetTitleMatchMode,2
 SetTitleMatchMode,Slow
 sleep,1500 ; give chance for gimp to save an active document ;
 
-args1:= (!a_args[1]? "C:\Script\AHK\__TESTS\New folder\0107.xcf" : a_args[1])
+Debug_Enabled:= False, Debug_Tooltip_Millisec:= 2000
 
-TempDir:= a_temp . "\"
+TimeStart:= A_Tickcount
 
-p:= splitpath(args1)
+Args1:= (!a_args[1]? "C:\Script\AHK\__TESTS\New folder\0107.xcf" : a_args[1])
+
+TempDir:= a_Temp . "\"
+
+p:= Splitpath(Args1)
 
 , PNGThumb:= TempDir . p.fn . ".png"
 , PNGThumb2:= TempDir . p.fn . "-nq8.png"
 , JFIFThumb:= TempDir . p.fn . "-nq8.JFIF"
 , thumb64txtfile:= p.dir . "\" . p.fn . ".txt"
-, cmdStr1:= (comspec " /c convert +repage -background none -thumbnail 256x256 -layers merge " chr(34) args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
+, cmdStr1:= (ComSpec " /c convert +repage -background none -thumbnail 256x256 -layers merge " chr(34) Args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
 , cmdStr105:= "C:\Apps\pngnq-s9-2.0.2\pngnq-s9.exe -f -s1-A " chr(34) PNGThumb chr(34)
-, cmdStr2:= comspec " /c convert " chr(34) PNGThumb2 chr(34) " " chr(34)  JFIFThumb chr(34) 
+, cmdStr2:= ComSpec " /c convert " chr(34) PNGThumb2 chr(34) " " chr(34)  JFIFThumb chr(34) 
 
 loop,parse,% "thumb64txtfile,PNGThumb,JFIFThumb",`,
-	if(FileExist(%a_loopfield%))
-		FileDelete,% %a_loopfield%
+	if(FileExist(%a_Loopfield%))
+		FileDelete,% %a_Loopfield%
 
 if(!FileExist(PNGThumb))
 	run,% cmdStr1,% p.dir,hide
@@ -84,13 +88,16 @@ loop,10 {
 		break,
 		else,FileDelete,% JFIFThumb
 }
-
+if(Debug_Enabled) {
+	tooltip,% "Thumbnail for: " Args1 "`nGenerated in: " TimeStart-a_TickCount " Milliseconds"
+sleep,% Debug_tooltip_Millisec
+}
 exitapp,
 
 ; other imagemagick commands
-;,cmdStr1:= comspec " /c mogrify -format png -append " chr(34) args1 chr(34) ;produced vertical strip of layers
-;,cmdStr1:= (comspec " /c convert  -alpha Set -background none -depth 8 -thumbnail 256x256 -reverse -composite -quality 0 " chr(34) args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
-;,cmdStr1:= (comspec " /c convert +repage -alpha copy -background none -thumbnail 256x256 -reverse -composite " chr(34) args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
+;,cmdStr1:= ComSpec " /c mogrify -format png -append " chr(34) Args1 chr(34) ;produced vertical strip of layers
+;,cmdStr1:= (ComSpec " /c convert  -alpha Set -background none -depth 8 -thumbnail 256x256 -reverse -composite -quality 0 " chr(34) Args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
+;,cmdStr1:= (ComSpec " /c convert +repage -alpha copy -background none -thumbnail 256x256 -reverse -composite " chr(34) Args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
 
 
 Base64Enc(ByRef Bin,nBytes,LineLength:=1280000,LeadingSpaces:=0) { ; By SKAN / 18-Aug-2017
