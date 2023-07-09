@@ -3,7 +3,10 @@ Shell Extension handler for .XCF Gimp files in Windows.
 
 <img width="640" alt="fgfg" src="https://github.com/wolfman616/GiMP_WinShell_ThumbnailProvider/assets/62726599/adb0c117-5cb7-465c-9c06-732b3fe53cbe">
 
-update added quantized nq s9 indexing into the chain, each thumbnail around 20kb @256x256 px 256 colours.
+update:
+Now most of the image conversion taking place in userspace temp dir to avoid overwriting PNG files with the name of the target in the target dir.
+
+added quantized nq s9 indexing into the chain, each thumbnail around 20kb @256x256 px 256 colours.
 
 Curretly one of the most problematic formats yet to be encountered with regards to automatically generating thumbnail previews in the windows shell.
 In deciding how best to proceed in the automation logical chain have chosen to use Imagemagick to render the Xcf files and deal with conversion to PNG -> JFIF then Autohotkey takes the image file and converts it to a base64 Text file whilst disposing of the thumbnail image files. the Base64 then proceeds to be ingested by the ImageFactory making use of IInitializeWithFile, it then disposes of the foementioned Text file(50% of the time as of writing this because the automatic detection of files and automatically deleting them seems to require a bit more precision and practise when issued from the c++ command-land). 
