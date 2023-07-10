@@ -89,7 +89,9 @@ private: //HRESULT _LoadXMLDocument( IXMLDOMDocument **ppXMLDoc);
     IStream* _pStream;     // provided during initialization.
 };
 
+//  In the event Gimp is saving a document which is in an open explorer window, Give a chance for the Gimp to save an active document as the Thumb Factory is invoked the instant the targets modified date is differing from the previous record held in the Windows thumbnail cache.
 HRESULT CRecipeThumbProvider_CreateInstance(REFIID riid, void** ppv) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
     CGimpThumbProvider* pNew= new (std::nothrow) CGimpThumbProvider();
     HRESULT hr= pNew ? S_OK : E_OUTOFMEMORY;
     if(SUCCEEDED(hr)) {
