@@ -1,17 +1,25 @@
 *	Install autohotkey version 1 (optional as i have included a compiled version of the helper)
 
 create a folder on the C Drive "script" and create a subfolder "ahk" inside that folder  
-The path will be this:
+The path will be the following:
 C:\Script\AHK
 Move or copy the AutoHotKeyThumbHelper script either .ahk or .exe into this location.
 
 Create another folder somewhere safe and unobtrusive
 	Move the folllowing into the folder:
-The RecipeThumbnailProvider.dll .dll file 
+The RecipeThumbnailProvider.dll .dll file which matches your operating system architecture (32bit or 64bit),
 The register_handler.bat
 
 Now run the register_handler.bat (as admin. (Not sure if admin is actually required)).
 
 if theres an issue you could also try run the registry file included before retrying the steps.
 
-My discord id 254489120053788672
+Matt@wolfsearchlight.co,uk
+
+My Discord id 
+254489120053788672
+
+My Monero wallet id
+486aS3Hn5EBfDqgkNDgZjdfnoMmTywEdaj1oBwX8MV689i65QdXNMmuBt123JusCe546MqjPgoFxzR59FERfibShP64GMKG
+
+If you found this helpful, any donation would be appreciated no matter how small.

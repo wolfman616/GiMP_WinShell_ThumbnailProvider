@@ -32,3 +32,19 @@ this needs to be assigned manually at the moment i believe it is required for th
 <img width="748" alt="Clipboarder 2023 07 06-024" src="https://github.com/wolfman616/GiMP_WinShell_ThumbnailProvider/assets/62726599/f89136ac-1b6d-48f6-8156-f91bcf1da228">
 
 <img width="560" alt="Clipboarder 2023 07 06-020" src="https://github.com/wolfman616/GiMP_WinShell_ThumbnailProvider/assets/62726599/0040d80d-3d7c-438a-ae59-413dac5cc713">
+
+I have included a precompiled DLL and precompiled AHK executable variant of the helper for those that do not want to compile the extension or have Autohotkey installed.
+
+If you have found this useful I would appreciate if you are able to make a donation to me. It has taken me close to 60 hours to write this code and years of prior learning and coding with the windows shell to enable me to realize this tool. 
+
+So please if you could see your way to repaying me some of the convenience and good vibes that this will bring your Windows user experience.
+
+I do not have and can not find a job presently and struggle very much on a day to day basis with keeping food and shelter.
+
+Matt@wolfsearchlight.co,uk
+
+Discord id:
+254489120053788672
+
+Monero wallet id:
+486aS3Hn5EBfDqgkNDgZjdfnoMmTywEdaj1oBwX8MV689i65QdXNMmuBt123JusCe546MqjPgoFxzR59FERfibShP64GMKG
