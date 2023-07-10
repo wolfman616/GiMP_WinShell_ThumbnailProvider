@@ -19,10 +19,11 @@ TempDir:= A_Temp . "\"
 p:= Splitpath(Args1)
 
 , PNGThumb:= TempDir . p.fn . ".png"
-, PNGThumb2:= TempDir . p.fn . "-nq8.png"
-, JFIFThumb:= TempDir . p.fn . "-nq8.JFIF"
+, PNGThumb2:= TempDir . p.fn . "-nq8.png" ; limits the pallete to 256 then quantizes the pallete.
+, JFIFThumb:= TempDir . p.fn . "-nq8.JFIF" ; this was the only method to manifest a working alpha channel that i found .
 , Thumb64TxtFile:= p.dir . "\" . p.fn . ".txt"
-, cmdStr1:= (ComSpec " /C convert +repage -background none -thumbnail 256x256 -layers merge " chr(34) Args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
+, cmdStr1:= (ComSpec " /C convert +repage -background none -layers merge " chr(34) Args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
+, cmdStr102:= (ComSpec " /C mogrify -thumbnail 256x256 " chr(34) PNGThumb chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
 , cmdStr105:= "C:\Apps\pngnq-s9-2.0.2\pngnq-s9.exe -f -s1-A " chr(34) PNGThumb chr(34)
 , cmdStr2:= ComSpec " /C convert " chr(34) PNGThumb2 chr(34) " " chr(34)  JFIFThumb chr(34) 
 
