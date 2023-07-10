@@ -12,7 +12,7 @@ The register_handler.bat
 
 Now run the register_handler.bat (as admin. (Not sure if admin is actually required)).
 
-if theres an issue you could also try run the registry file included before retrying the steps.
+if theres an issue you could also try editing the registry file included to match your dll location, and then executing the reg file before retrying the steps.
 
 Matt@wolfsearchlight.co,uk
 
