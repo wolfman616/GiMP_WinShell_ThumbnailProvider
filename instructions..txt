@@ -1,0 +1,13 @@
+*	Install autohotkey version 1 (optional as i have included a compiled version of the helper)
+
+Create a folder somewhere safe and unobtrusive
+	Move the folllowing into the folder:
+The .dll file RecipeThumbnailProvider.dll
+The AutoHotKeyThumbHelper script either .ahk or .exe
+The register_handler.bat
+
+Now run the register_handler.bat as admin. (Not sure if admin is actually required).
+
+if theres an issue you could also try run the registry file included before retrying the steps.
+
+My discord id 254489120053788672
