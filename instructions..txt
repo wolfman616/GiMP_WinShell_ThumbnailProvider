@@ -14,7 +14,7 @@ Now run the register_handler.bat (as admin. (Not sure if admin is actually requi
 
 if theres an issue you could also try editing the registry file included to match your dll location, and then executing the reg file before retrying the steps.
 
-Matt@wolfsearchlight.co,uk
+Matt@Wolfsearchlight.co,uk
 
 My Discord id 
 254489120053788672
