@@ -7,7 +7,7 @@ Move or copy the AutoHotKeyThumbHelper script either .ahk or .exe into this loca
 
 Create another folder somewhere safe and unobtrusive
 	Move the folllowing into the folder:
-The RecipeThumbnailProvider.dll .dll file which matches your operating system architecture (32bit or 64bit),
+The GimpThumbnailProvider.dll .dll file which matches your operating system architecture (32bit or 64bit),
 The register_handler.bat
 
 Now run the register_handler.bat (as admin. (Not sure if admin is actually required)).
