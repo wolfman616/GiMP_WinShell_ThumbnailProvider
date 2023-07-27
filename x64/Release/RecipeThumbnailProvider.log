@@ -1,0 +1,6 @@
+﻿  Dll.cpp
+  GimpThumbnailProvider.cpp
+  Generating Code...
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1363,5): warning MSB8012: TargetPath(D:\Documents\My c0d3\thumb_2_ass\x64\Release\GimpThumbnailProvider.dll) does not match the Linker's OutputFile property value (D:\Documents\My c0d3\thumb_2_ass\x64\Release\RecipeThumbnailProvider.dll). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1365,5): warning MSB8012: TargetName(GimpThumbnailProvider) does not match the Linker's OutputFile property value (RecipeThumbnailProvider). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+  RecipeThumbnailProvider.vcxproj -> D:\Documents\My c0d3\thumb_2_ass\x64\Release\GimpThumbnailProvider.dll

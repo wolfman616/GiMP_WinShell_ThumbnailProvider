@@ -7,6 +7,7 @@ DetectHiddenText,On
 DetectHiddenWindows,On
 SetTitleMatchMode,2
 SetTitleMatchMode,Slow
+
 Debug_Enabled:= False, Debug_Tooltip_Millisec:= 2000
 
 TimeStart:= A_Tickcount
@@ -16,15 +17,26 @@ Args1:= ( !A_Args[1]? "C:\Script\AHK\__TESTS\New folder\0107.xcf" : A_Args[1] )
 TempDir:= A_Temp . "\"
 
 p:= Splitpath(Args1)
+if(p.ext!="xcf") {
+	if(isdir(Args1))
+		goto,FOLDERTHUMBFACTORY
+} else,goto,XCFTHUMBFACTORY
+return,
 
-, PNGThumb:= TempDir . p.fn . ".png"
-, PNGThumb2:= TempDir . p.fn . "-nq8.png" ; limits the pallete to 256 then quantizes the pallete.
+FOLDERTHUMBFACTORY:
+
+return,
+
+XCFTHUMBFACTORY:
+	PNGThumb := TempDir . p.fn . ".png"
+, PNGThumb2:= TempDir . p.fn . "-nq8.png"  ; Pallete quantized and limited to 256.
 , JFIFThumb:= TempDir . p.fn . "-nq8.JFIF" ; this was the only method to manifest a working alpha channel that i found .
-, Thumb64TxtFile:= p.dir . "\" . p.fn . ".txt"
-, cmdStr1:= (ComSpec " /C convert -background none -layers merge " chr(34) Args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
-, cmdStr102:= (ComSpec " /C convert -thumbnail 256x256 " chr(34) PNGThumb chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
+;, Thumb64TxtFile:= p.dir . "\" . p.fn . ".txt"
+, Thumb64TxtFile:= "C:\Users\ninj\AppData\Local\Temp\thumb64.txt"
+, cmdStr1:= (ComSpec " /C convert -quality 0 -background none -layers merge " chr(34) Args1 chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
+, cmdStr102:= (ComSpec " /C convert -quality 0 -thumbnail 256x256 " chr(34) PNGThumb chr(34) " " chr(34) PNGThumb chr(34)) ;produced final composite of layers
 , cmdStr105:= "C:\Apps\pngnq-s9-2.0.2\pngnq-s9.exe -f -s1-A " chr(34) PNGThumb chr(34)
-, cmdStr2:= ComSpec " /C convert " chr(34) PNGThumb2 chr(34) " " chr(34)  JFIFThumb chr(34) 
+, cmdStr2:= ComSpec " /C convert -quality 0 " chr(34) PNGThumb2 chr(34) " " chr(34) JFIFThumb chr(34) 
 
 loop,parse,% "Thumb64TxtFile,PNGThumb,JFIFThumb",`,
 	if(FileExist(%a_Loopfield%))

@@ -32,13 +32,6 @@ using namespace std;
 
 std::wstring WStrGlobal;
 
-template <class T> void SafeRelease(T** ppT) {
-    if(*ppT) {
-        (*ppT)->Release();
-        *ppT = NULL;
-    }
-}
-
 #pragma comment(lib,"shlwapi.lib")
 #pragma comment(lib,"windowscodecs.lib")
 #pragma comment(lib,"Crypt32.lib")
@@ -46,19 +39,18 @@ template <class T> void SafeRelease(T** ppT) {
 
 //    Using Process isolation override.
 //    Implementing IInitializeWithFile to work toward being hosted in an un-isolated Explorer process *, promoting succesful Spaghetti-like nature, Thumbnail & Preview.
-class CGimpThumbProvider : public IInitializeWithFile, public IThumbnailProvider {
-  public:
+class CGimpThumbProvider : public IInitializeWithFile, public IThumbnailProvider
+{
+public:
     CGimpThumbProvider() : _cRef(1), _pStream(NULL) {
     }
 
-//  Release sequence.
+    //  Release sequence.
     virtual ~CGimpThumbProvider() {
-        if(_pStream) {
-            _pStream->Release();
-        }
+        (_pStream)? _pStream->Release(): static_cast<void>(0);
     }
-//  IUnknown
-    IFACEMETHODIMP QueryInterface(REFIID riid, void** ppv) {   
+    //  IUnknown
+    IFACEMETHODIMP QueryInterface(REFIID riid, void** ppv) {
         static const QITAB qit[] = {
             QITABENT(CGimpThumbProvider, IInitializeWithFile),
             QITABENT(CGimpThumbProvider, IThumbnailProvider),
@@ -77,101 +69,108 @@ class CGimpThumbProvider : public IInitializeWithFile, public IThumbnailProvider
         } return cRef;
     }
 
-//  IInitializeWithfile
-    IFACEMETHODIMP Initialize(LPCWSTR pszFilePath,DWORD grfMode);
-//  IThumbnailProvider
-    IFACEMETHODIMP GetThumbnail(UINT cx,HBITMAP* phbmp,WTS_ALPHATYPE* pdwAlpha);
+    //  IInitializeWithfile
+    IFACEMETHODIMP Initialize(LPCWSTR pszFilePath, DWORD grfMode);
+    //  IThumbnailProvider
+    IFACEMETHODIMP GetThumbnail(UINT cx, HBITMAP* phbmp, WTS_ALPHATYPE* pdwAlpha);
 
 private: //HRESULT _LoadXMLDocument( IXMLDOMDocument **ppXMLDoc);
     HRESULT _GetBase64EncodedImageString(UINT cx, PWSTR* ppszResult);
     HRESULT _GetStreamFromString(PCWSTR pszImageName, IStream** ppStream);
     long _cRef;
-    IStream* _pStream;     // provided during initialization.
+    IStream* _pStream; // provided during initialization.
 };
 
-//  In the event Gimp is saving a document which is in an open explorer window, Give a chance for the Gimp to save an active document as the Thumb Factory is invoked the instant the targets modified date is differing from the previous record held in the Windows thumbnail cache.
-HRESULT CRecipeThumbProvider_CreateInstance(REFIID riid, void** ppv) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
-    CGimpThumbProvider* pNew= new (std::nothrow) CGimpThumbProvider();
-    HRESULT hr= pNew ? S_OK : E_OUTOFMEMORY;
-    if(SUCCEEDED(hr)) {
-        hr= pNew->QueryInterface(riid, ppv);
+// In the event Gimp is saving a document which is in an open explorer window, Give a chance for the Gimp to save an active document as the Thumb Factory is invoked the instant the targets modified date is differing from the previous record held in the Windows thumbnail cache.
+HRESULT CGimpThumbProvider_CreateInstance(REFIID riid, void** ppv) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    CGimpThumbProvider* pNew = new (std::nothrow) CGimpThumbProvider();
+    HRESULT hr = pNew ? S_OK : E_OUTOFMEMORY;
+    if (SUCCEEDED(hr)) {
+        hr = pNew->QueryInterface(riid, ppv);
         pNew->Release();
     } return hr;
 }
 
 // IInitializeWithFile
-IFACEMETHODIMP CGimpThumbProvider::Initialize(LPCWSTR pszFilePath,DWORD grfMode) { 
-    HRESULT hr= E_UNEXPECTED;  //can only be inited once
-    if(pszFilePath != NULL) {
-        unsigned int4= 2;
+IFACEMETHODIMP CGimpThumbProvider::Initialize(LPCWSTR pszFilePath, DWORD grfMode) {
+    HRESULT hr = E_UNEXPECTED;  //can only be inited once
+    if (pszFilePath != NULL) {
+        unsigned int4 = 2;
         std::stringstream ass;
-         //std::string narrow = string4.to_bytes(pszFilePath);
-        std::wstring string4=pszFilePath;
-        std::wstring_convert<std::codecvt_utf8<wchar_t>>conv1;
-        std::string string1= conv1.to_bytes(string4);
-         // std::cout<< "UTF-8 conversion produced "<<string1.size()<<" bytes:\n";
-         // wide to UTF-16le
-        std::wstring_convert<std::codecvt_utf16<wchar_t,0x10ffff,std::little_endian>>conv2;
-         //  std::string u16str = conv2.to_bytes(string4);
-         // MessageBoxA(NULL, string1.c_str(), "u8",MB_OK|MB_SETFOREGROUND);
-         // MessageBoxA(NULL, u16str.c_str(), "u16",MB_OK|MB_SETFOREGROUND);
-        string string2= "\"" + string1 + "\"";
-        LPCSTR command1= "open";
-        LPCSTR LPFILE= "\"C:\\Script\\AHK\\z_ConTxt\\GIMP_XCF_Shell_Thumb_Helper.ahk\"";
-        LPCSTR lpParameters= string2.c_str();
-        ShellExecuteA(NULL,command1,LPFILE,lpParameters,NULL,0);
-        int4 = strlen(string1.c_str());
-        string string3= ".txt";
-        string1.replace(int4 -4,4,string3);
+        std::wstring string4 = pszFilePath;
+       std::wstring_convert<std::codecvt_utf8<wchar_t>>conv1;
+        std::string string1 = conv1.to_bytes(string4);
+     // std::cout<< "UTF-8 conversion produced "<<string1.size()<<" bytes:\n";
+     // wide to UTF-16le
+     // std::wstring_convert<std::codecvt_utf16<wchar_t, 0x10ffff, std::little_endian>>conv2;
+     // std::string u16str = conv2.to_bytes(string4);
+     // MessageBoxA(NULL, u16str.c_str(), "u16",MB_OK|MB_SETFOREGROUND);
+        string string2 = "\"" + string1 + "\"";
+        LPCSTR lpParameters = string2.c_str();
+        LPCSTR command1 = "open";
+        LPCSTR LPFILE = "\"C:\\Script\\AHK\\z_ConTxt\\GIMP_XCF_Shell_Thumb_Helper.ahk\"";
+        std::string LPb64textfile = "C:\\Users\\ninj\\AppData\\Local\\Temp\\thumb64.txt";
+        CA2W ca3w(LPb64textfile.c_str());
+        BOOL res = 0;
+     // res = DeleteFileW(ca3w);
+        ShellExecuteA(NULL, command1, LPFILE, lpParameters, NULL, 0);
+        int4 = strlen(LPb64textfile.c_str());
+        std::string string3 = ".txt";
+     // string1.replace(int4 - 4, 4, string3); //; this crashes the whole of explorer
         IStream* _pStream;
-        bool existtxt= 0;
+        bool existtxt = 0;
         struct stat buffer;
-        while (existtxt== 0) {
-            existtxt = (stat(string1.c_str(), &buffer)== 0);
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        } std::ifstream ifs(string1);
+        int readattempts = 0;
+        while(existtxt == 0 && readattempts < 10) {
+            readattempts++;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        existtxt = (stat(LPb64textfile.c_str(), &buffer) == 0);
+        } if(existtxt== 0)
+            return 1;
+        std::ifstream ifs(LPb64textfile);
         std::string content;
         content.assign((std::istreambuf_iterator<char>(ifs)),
-        (std::istreambuf_iterator<char>()));
+            (std::istreambuf_iterator<char>()));
         ifs.close();
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(800));
         CA2W ca2w(content.c_str());
-        CA2W ca3w(string1.c_str());
-        WStrGlobal= ca2w;
-        BOOL res= 0;
-        while (res== 0) {
-            res= DeleteFileW(ca3w);
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        }
+        WStrGlobal = ca2w;
+        res = 0;
+        int deleteAttempts = 0;
+      //    while (res == 0 && deleteAttempts < 5) {
+      //        std::this_thread::sleep_for(std::chrono::milliseconds(800));
+      //        res = DeleteFileW(ca3w);
+      //   } //i(res==0) //return 1;
     } return 1;
 }
 
-//  Gets the base64-encoded string which represents the image.
+// Gets the base64-encoded string which represents the image.
 HRESULT CGimpThumbProvider::_GetBase64EncodedImageString(UINT /* cx */, PWSTR* ppszResult) {
-    *ppszResult= NULL;  //HRESULT hr = _LoadXMLDocument(&pXMLDoc);
-    HRESULT hr4= E_UNEXPECTED;  // can only be inited once
-    if(SUCCEEDED(hr4)) {
+    *ppszResult = NULL;  //HRESULT hr = _LoadXMLDocument(&pXMLDoc);
+    HRESULT hr4 = E_UNEXPECTED;  // can only be inited once
+    if (SUCCEEDED(hr4)) {
         IXMLDOMDocument* pXMLDoc;
-        BSTR bstrQuery = SysAllocString(L"Recipe/Attachments/Picture");
-        hr4= bstrQuery ? S_OK : E_OUTOFMEMORY;
-        if(SUCCEEDED(hr4)) {
+        BSTR bstrQuery = SysAllocString(L"Gimp/Attachments/Picture");
+        hr4 = bstrQuery ? S_OK : E_OUTOFMEMORY;
+        if (SUCCEEDED(hr4)) {
             IXMLDOMNode* pXMLNode;
-            hr4= pXMLDoc->selectSingleNode(bstrQuery, &pXMLNode);
-            if(SUCCEEDED(hr4)) {
+            hr4 = pXMLDoc->selectSingleNode(bstrQuery, &pXMLNode);
+            if (SUCCEEDED(hr4)) {
                 IXMLDOMElement* pXMLElement;
-                hr4= pXMLNode->QueryInterface(&pXMLElement);
-                if(SUCCEEDED(hr4)) {
+                hr4 = pXMLNode->QueryInterface(&pXMLElement);
+                if (SUCCEEDED(hr4)) {
                     BSTR bstrAttribute = SysAllocString(L"Source");
-                    hr4= bstrAttribute ? S_OK : E_OUTOFMEMORY;
-                    if(SUCCEEDED(hr4)) {
+                    hr4 = bstrAttribute ? S_OK : E_OUTOFMEMORY;
+                    if (SUCCEEDED(hr4)) {
                         VARIANT varValue;
-                        hr4= pXMLElement->getAttribute(bstrAttribute, &varValue);
-                        if(SUCCEEDED(hr4)) {
-                            if((varValue.vt == VT_BSTR) && varValue.bstrVal && varValue.bstrVal[0]) {
-                                hr4= SHStrDupW(varValue.bstrVal, ppszResult);
-                            } else {
-                                hr4= E_FAIL;
+                        hr4 = pXMLElement->getAttribute(bstrAttribute, &varValue);
+                        if (SUCCEEDED(hr4)) {
+                            if ((varValue.vt == VT_BSTR) && varValue.bstrVal && varValue.bstrVal[0]) {
+                                hr4 = SHStrDupW(varValue.bstrVal, ppszResult);
+                            }
+                            else {
+                                hr4 = E_FAIL;
                             } VariantClear(&varValue);
                         } SysFreeString(bstrAttribute);
                     } pXMLElement->Release();
@@ -185,22 +184,20 @@ HRESULT CGimpThumbProvider::_GetBase64EncodedImageString(UINT /* cx */, PWSTR* p
 HRESULT CGimpThumbProvider::_GetStreamFromString(PCWSTR pszImageName, IStream** ppImageStream) {
     HRESULT hr = E_FAIL;
     pszImageName = (PCWSTR)WStrGlobal.c_str();
- //   MessageBoxW(NULL,pszImageName, L"_GetStreamFromString", MB_OK|MB_SETFOREGROUND);
     DWORD dwDecodedImageSize = 0;
     DWORD dwSkipChars = 0;
-    DWORD dwActualFormat = 0;   // pszImageName = L"iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAMAAACeyVWkAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAe1BMVEUyzTIyMiULFA4HJjYdLxkqLxkUEhQhLQ0WCSwYEB0jKw4FJTUrLxsbLh4SCS4RCS8gKwwRCTIWCTMSCTMWKysPKDUEGysUCTMUKTIGDg8VKTEFERsYCioDIzMaCycOFA4FEhcHEx4QFA8HEyIFFCYFDw8DIC8FERH///8Q851bAAAAAXRSTlMAQObYZgAAAAFiS0dEKL2wtbIAAAAHdElNRQfnBwYAFBBjx8VnAAAAEGNhTnYAAAAVAAAAFQAAADQAAACKRYVBIwAAAMtJREFUGNONUItOwzAMvDXQdgyaPqCbZ6DN0pD//0Mcr1vXaUhYUc45n89WgEtssIoM/w1zbTFPz5rk+cwUZbHoti9zsisX8vVNobL13wMa1GiNLFTfibp3mI9z2iNHua/ag7h3IOAoJBN6qqz9PABfKvtO0m02jKRP2+i6uPi67JRAL1myBSPjIfVZ7ybfmak/C4NzHqkwCOInSQFab1eJHxARiAQRoyM+YZqrxCMFikTRs3JR6ZGDFEiONE/e3vhx8ucA+EefpMN/AWwNDKFSJt+sAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIzLTA3LTA2VDAwOjE3OjM5KzAwOjAwFA6vlAAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMy0wNy0wNlQwMDoxNzozOSswMDowMGVTFygAAAAUdEVYdGxhYmVsAEZyYW1lIDYgKDIwbXMpHDgDmQAAAABJRU5ErkJggg";   
-   // MessageBoxW(NULL, pszImageName, L"_GetStreamFromString",MB_OK|MB_SETFOREGROUND);
+    DWORD dwActualFormat = 0;   
     BOOL fSuccess = CryptStringToBinaryW(pszImageName, NULL, CRYPT_STRING_BASE64,   //Base64-decode string
         NULL, &dwDecodedImageSize, &dwSkipChars, &dwActualFormat);
-    if(fSuccess) {
-        BYTE* pbDecodedImage= (BYTE*)LocalAlloc(LPTR, dwDecodedImageSize);
-        if(pbDecodedImage) {
-            fSuccess = CryptStringToBinaryW(pszImageName, lstrlenW(pszImageName),CRYPT_STRING_BASE64,
+    if (fSuccess) {
+        BYTE* pbDecodedImage = (BYTE*)LocalAlloc(LPTR, dwDecodedImageSize);
+        if (pbDecodedImage) {
+            fSuccess = CryptStringToBinaryW(pszImageName, lstrlenW(pszImageName), CRYPT_STRING_BASE64,
                 pbDecodedImage, &dwDecodedImageSize, &dwSkipChars, &dwActualFormat);
-            if(fSuccess) {
+            if (fSuccess) {
                 *ppImageStream = SHCreateMemStream(pbDecodedImage, dwDecodedImageSize);
-                if(*ppImageStream != NULL) {
-                    hr= S_OK;
+                if (*ppImageStream != NULL) {
+                    hr = S_OK;
                 }
             } LocalFree(pbDecodedImage);
         }
@@ -208,44 +205,46 @@ HRESULT CGimpThumbProvider::_GetStreamFromString(PCWSTR pszImageName, IStream** 
 }
 
 HRESULT ConvertBitmapSourceTo32BPPHBITMAP(IWICBitmapSource* pBitmapSource, IWICImagingFactory* pImagingFactory, HBITMAP* phbmp) {
-    *phbmp= NULL;
+    *phbmp = NULL;
     IWICBitmapSource* pBitmapSourceConverted = NULL;
     WICPixelFormatGUID guidPixelFormatSource;
-    HRESULT hr= pBitmapSource->GetPixelFormat(&guidPixelFormatSource);
-    if(SUCCEEDED(hr) &&(guidPixelFormatSource != GUID_WICPixelFormat32bppBGRA)) {
+    HRESULT hr = pBitmapSource->GetPixelFormat(&guidPixelFormatSource);
+    if (SUCCEEDED(hr) && (guidPixelFormatSource != GUID_WICPixelFormat32bppBGRA)) {
         IWICFormatConverter* pFormatConverter;
-        hr= pImagingFactory->CreateFormatConverter(&pFormatConverter);
-        if(SUCCEEDED(hr)) { // Create the appropriate pixel format converter
-            hr= pFormatConverter->Initialize(pBitmapSource,GUID_WICPixelFormat32bppBGRA,WICBitmapDitherTypeNone,NULL,0,WICBitmapPaletteTypeCustom);
-            if(SUCCEEDED(hr)) {
-                hr= pFormatConverter->QueryInterface(&pBitmapSourceConverted);
+        hr = pImagingFactory->CreateFormatConverter(&pFormatConverter);
+        if (SUCCEEDED(hr)) { // Create the appropriate pixel format converter
+            hr = pFormatConverter->Initialize(pBitmapSource, GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, NULL, 0, WICBitmapPaletteTypeCustom);
+            if (SUCCEEDED(hr)) {
+                hr = pFormatConverter->QueryInterface(&pBitmapSourceConverted);
             } pFormatConverter->Release();
         }
-    } else {
-        hr= pBitmapSource->QueryInterface(&pBitmapSourceConverted);  // No conversion necessary
-    } if(SUCCEEDED(hr)) {
+    }
+    else {
+        hr = pBitmapSource->QueryInterface(&pBitmapSourceConverted);  // No conversion necessary
+    } if (SUCCEEDED(hr)) {
         UINT nWidth, nHeight;
-        hr= pBitmapSourceConverted->GetSize(&nWidth,&nHeight);
-        if(SUCCEEDED(hr)) {
+        hr = pBitmapSourceConverted->GetSize(&nWidth, &nHeight);
+        if (SUCCEEDED(hr)) {
             BITMAPINFO bmi = {};
-            bmi.bmiHeader.biSize= sizeof(bmi.bmiHeader);
-            bmi.bmiHeader.biWidth= nWidth;
-            bmi.bmiHeader.biHeight= -static_cast<LONG>(nHeight);
-            bmi.bmiHeader.biPlanes= 1;
-            bmi.bmiHeader.biBitCount= 32;
-            bmi.bmiHeader.biCompression= BI_RGB;
+            bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
+            bmi.bmiHeader.biWidth = nWidth;
+            bmi.bmiHeader.biHeight = -static_cast<LONG>(nHeight);
+            bmi.bmiHeader.biPlanes = 1;
+            bmi.bmiHeader.biBitCount = 32;
+            bmi.bmiHeader.biCompression = BI_RGB;
             BYTE* pBits;
-            HBITMAP hbmp= CreateDIBSection(NULL,&bmi,DIB_RGB_COLORS,reinterpret_cast<void**>(&pBits),NULL,0);
-            hr= hbmp ? S_OK : E_OUTOFMEMORY;
-            if(SUCCEEDED(hr)) {
-                WICRect rect= {0,0,nWidth,nHeight};
+            HBITMAP hbmp = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, reinterpret_cast<void**>(&pBits), NULL, 0);
+            hr = hbmp ? S_OK : E_OUTOFMEMORY;
+            if (SUCCEEDED(hr)) {
+                WICRect rect = { 0,0,nWidth,nHeight };
                 // Convert the pixels and store them in the HBITMAP.  Note: the name of the function is a little
                 // misleading - we're not doing any extraneous copying here.  CopyPixels is actually converting the
                 // image into the given buffer.
-                hr= pBitmapSourceConverted->CopyPixels(&rect,nWidth *4,nWidth *nHeight *4,pBits);
-                if(SUCCEEDED(hr)) {
-                    *phbmp= hbmp;
-                } else {
+                hr = pBitmapSourceConverted->CopyPixels(&rect, nWidth * 4, nWidth * nHeight * 4, pBits);
+                if (SUCCEEDED(hr)) {
+                    *phbmp = hbmp;
+                }
+                else {
                     DeleteObject(hbmp);
                 }
             }
@@ -253,19 +252,19 @@ HRESULT ConvertBitmapSourceTo32BPPHBITMAP(IWICBitmapSource* pBitmapSource, IWICI
     } return hr;
 }
 
-HRESULT WICCreate32BitsPerPixelHBITMAP(IStream* pstm,UINT /* cx */,HBITMAP* phbmp,WTS_ALPHATYPE* pdwAlpha) {
+HRESULT WICCreate32BitsPerPixelHBITMAP(IStream* pstm, UINT /* cx */, HBITMAP* phbmp, WTS_ALPHATYPE* pdwAlpha) {
     *phbmp = NULL;
     IWICImagingFactory* pImagingFactory;
-    HRESULT hr= CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pImagingFactory));
-    if(SUCCEEDED(hr)) {
+    HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pImagingFactory));
+    if (SUCCEEDED(hr)) {
         IWICBitmapDecoder* pDecoder;
-        hr= pImagingFactory->CreateDecoderFromStream(pstm, &GUID_VendorMicrosoft, WICDecodeMetadataCacheOnDemand, &pDecoder);
-        if(SUCCEEDED(hr)) {
+        hr = pImagingFactory->CreateDecoderFromStream(pstm, &GUID_VendorMicrosoft, WICDecodeMetadataCacheOnDemand, &pDecoder);
+        if (SUCCEEDED(hr)) {
             IWICBitmapFrameDecode* pBitmapFrameDecode;
-            hr= pDecoder->GetFrame(0,&pBitmapFrameDecode);
-            if(SUCCEEDED(hr)) {
-                hr= ConvertBitmapSourceTo32BPPHBITMAP(pBitmapFrameDecode,pImagingFactory,phbmp);
-                if(SUCCEEDED(hr)) {
+            hr = pDecoder->GetFrame(0, &pBitmapFrameDecode);
+            if (SUCCEEDED(hr)) {
+                hr = ConvertBitmapSourceTo32BPPHBITMAP(pBitmapFrameDecode, pImagingFactory, phbmp);
+                if (SUCCEEDED(hr)) {
                     *pdwAlpha = WTSAT_ARGB;
                 } pBitmapFrameDecode->Release();
             } pDecoder->Release();
@@ -274,14 +273,14 @@ HRESULT WICCreate32BitsPerPixelHBITMAP(IStream* pstm,UINT /* cx */,HBITMAP* phbm
 }
 
 // IThumbnailProvider
-IFACEMETHODIMP CGimpThumbProvider::GetThumbnail(UINT cx,HBITMAP* phbmp,WTS_ALPHATYPE* pdwAlpha) {
+IFACEMETHODIMP CGimpThumbProvider::GetThumbnail(UINT cx, HBITMAP* phbmp, WTS_ALPHATYPE* pdwAlpha) {
     PWSTR pszBase64EncodedImageString;
-    HRESULT hr= _GetBase64EncodedImageString(cx, &pszBase64EncodedImageString);
-    if(SUCCEEDED(hr)) {
+    HRESULT hr = _GetBase64EncodedImageString(cx, &pszBase64EncodedImageString);
+    if (SUCCEEDED(hr)) {
         IStream* pImageStream;
-        hr= _GetStreamFromString(pszBase64EncodedImageString, &pImageStream);
-        if(SUCCEEDED(hr)) {
-            hr= WICCreate32BitsPerPixelHBITMAP(pImageStream,cx,phbmp,pdwAlpha);;
+        hr = _GetStreamFromString(pszBase64EncodedImageString, &pImageStream);
+        if (SUCCEEDED(hr)) {
+            hr = WICCreate32BitsPerPixelHBITMAP(pImageStream, cx, phbmp, pdwAlpha);;
             pImageStream->Release();
         } CoTaskMemFree(pszBase64EncodedImageString);
     } return hr;

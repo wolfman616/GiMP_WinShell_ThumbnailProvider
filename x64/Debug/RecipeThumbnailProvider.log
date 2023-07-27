@@ -1,0 +1,6 @@
+﻿cl : command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  GimpThumbnailProvider.cpp
+  Dll.cpp
+  Generating Code...
+     Creating library x64\Debug\GimpThumbnailProvider.lib and object x64\Debug\GimpThumbnailProvider.exp
+  RecipeThumbnailProvider.vcxproj -> D:\Documents\My c0d3\thumb_2_ass\x64\Debug\GimpThumbnailProvider.dll

@@ -1,0 +1,10 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(513,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (RecipeThumbnailProvider.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+cl : command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  GimpThumbnailProvider.cpp
+  Dll.cpp
+  Generating Code...
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1363,5): warning MSB8012: TargetPath(D:\Documents\My c0d3\thumb_2_ass\Debug\GimpThumbnailProvider.dll) does not match the Linker's OutputFile property value (D:\Documents\My c0d3\thumb_2_ass\Debug\RecipeThumbnailProvider.dll). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1365,5): warning MSB8012: TargetName(GimpThumbnailProvider) does not match the Linker's OutputFile property value (RecipeThumbnailProvider). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+Dll.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
+     Creating library Debug\RecipeThumbnailProvider.lib and object Debug\RecipeThumbnailProvider.exp
+  RecipeThumbnailProvider.vcxproj -> D:\Documents\My c0d3\thumb_2_ass\Debug\GimpThumbnailProvider.dll

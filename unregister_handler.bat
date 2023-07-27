@@ -1,1 +1,1 @@
-regsvr32 /u RecipeThumbnailProvider.dll
+regsvr32 /u GimpThumbnailProvider.dll
