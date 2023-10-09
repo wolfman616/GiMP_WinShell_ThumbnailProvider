@@ -1,3 +1,7 @@
+
+![sfdfs](https://github.com/wolfman616/GiMP_WinShell_ThumbnailProvider/assets/62726599/ed789c9b-90d7-4f33-96b0-40013fec2e4c)
+
+
 ---
 page_type: sample
 languages:
@@ -23,7 +27,7 @@ Debugging thumbnail handlers is difficult for several reasons.
 
 1) The Windows Explorer hosts thumbnail providers in an isolated process to get robustness and improve security. Because of this it is difficult to debug your handler as you cannot set breakpoints on your code in the explorer.exe process as it is not loaded there. The isolated process is DllHost.exe and this is used for other purposes so finding the right instance of this process is difficult. 
 
-2) Once a thumbnail is computed for a particular file it is cached and your handler won’t be called again for that item unless you invalidate the cache by updating the modification date of the file. Note that this cache works even if the files are renamed or moved.
+2) Once a thumbnail is computed for a particular file it is cached and your handler wonâ€™t be called again for that item unless you invalidate the cache by updating the modification date of the file. Note that this cache works even if the files are renamed or moved.
 
 Given all of these issues, the easiest way to debug your code is in a test application,
 such as the [UsingThumbnailProviders](https://github.com/microsoft/Windows-classic-samples/tree/master/Samples/Win7Samples/winui/shell/appplatform/UsingThumbnailProviders) sample.
