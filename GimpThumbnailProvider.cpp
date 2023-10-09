@@ -27,7 +27,10 @@
 #include <codecvt>        // std::codecvt_utf8_utf16
 #include <sys/stat.h>
 #include <string>
+#include <wincrypt.h>
+
 #include <fstream>
+#pragma comment(lib, "Crypt32.lib")
 using namespace std;
 
 std::wstring WStrGlobal;
@@ -35,7 +38,6 @@ std::wstring WStrGlobal;
 #pragma comment(lib,"shlwapi.lib")
 #pragma comment(lib,"windowscodecs.lib")
 #pragma comment(lib,"Crypt32.lib")
-#pragma comment(lib,"msxml6.lib")
 
 //    Using Process isolation override.
 //    Implementing IInitializeWithFile to work toward being hosted in an un-isolated Explorer process *, promoting succesful Spaghetti-like nature, Thumbnail & Preview.
@@ -43,6 +45,7 @@ class CGimpThumbProvider : public IInitializeWithFile, public IThumbnailProvider
 {
 public:
     CGimpThumbProvider() : _cRef(1), _pStream(NULL) {
+
     }
 
     //  Release sequence.
@@ -83,7 +86,9 @@ private: //HRESULT _LoadXMLDocument( IXMLDOMDocument **ppXMLDoc);
 
 // In the event Gimp is saving a document which is in an open explorer window, Give a chance for the Gimp to save an active document as the Thumb Factory is invoked the instant the targets modified date is differing from the previous record held in the Windows thumbnail cache.
 HRESULT CGimpThumbProvider_CreateInstance(REFIID riid, void** ppv) {
+
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
     CGimpThumbProvider* pNew = new (std::nothrow) CGimpThumbProvider();
     HRESULT hr = pNew ? S_OK : E_OUTOFMEMORY;
     if (SUCCEEDED(hr)) {
@@ -96,38 +101,98 @@ HRESULT CGimpThumbProvider_CreateInstance(REFIID riid, void** ppv) {
 IFACEMETHODIMP CGimpThumbProvider::Initialize(LPCWSTR pszFilePath, DWORD grfMode) {
     HRESULT hr = E_UNEXPECTED;  //can only be inited once
     if (pszFilePath != NULL) {
+
+ 
+
+
         unsigned int4 = 2;
         std::stringstream ass;
         std::wstring string4 = pszFilePath;
-       std::wstring_convert<std::codecvt_utf8<wchar_t>>conv1;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>>conv1;
         std::string string1 = conv1.to_bytes(string4);
-     // std::cout<< "UTF-8 conversion produced "<<string1.size()<<" bytes:\n";
-     // wide to UTF-16le
-     // std::wstring_convert<std::codecvt_utf16<wchar_t, 0x10ffff, std::little_endian>>conv2;
-     // std::string u16str = conv2.to_bytes(string4);
-     // MessageBoxA(NULL, u16str.c_str(), "u16",MB_OK|MB_SETFOREGROUND);
-        string string2 = "\"" + string1 + "\"";
-        LPCSTR lpParameters = string2.c_str();
+   
         LPCSTR command1 = "open";
         LPCSTR LPFILE = "\"C:\\Script\\AHK\\z_ConTxt\\GIMP_XCF_Shell_Thumb_Helper.ahk\"";
-        std::string LPb64textfile = "C:\\Users\\ninj\\AppData\\Local\\Temp\\thumb64.txt";
-        CA2W ca3w(LPb64textfile.c_str());
+        
+
+       std::string input_string = string1;
+        DWORD binary_length = input_string.length();
+        BYTE* binary_data = (BYTE*)input_string.c_str();
+        DWORD base64_length = 0;
+        CryptBinaryToStringA(binary_data,
+            binary_length,
+            CRYPT_STRING_BASE64,
+            NULL,
+            &base64_length);
+
+        char* encoded_data = new char[base64_length];
+
+        CryptBinaryToStringA(binary_data,
+            binary_length,
+            CRYPT_STRING_BASE64,
+            encoded_data,
+            &base64_length);
+
+        //std::cout << encoded_data << std::endl;
+
+            std::string LPb64 = encoded_data;
+
+            std::string LPb64textfile = "C:\\Users\\ninj\\AppData\\Local\\Temp\\" + LPb64 + ".txt";
+            LPb64textfile.erase(std::remove(LPb64textfile.begin(), LPb64textfile.end(), '\n'), LPb64textfile.end());
+            LPb64textfile.erase(std::remove(LPb64textfile.begin(), LPb64textfile.end(), '\r'), LPb64textfile.end());
+
+            std::string arg2 = encoded_data;
+
+
+        string string2 = "\"" + string1 + "\" \"" + arg2 + "\"";
+         //MessageBoxA(NULL, string2.c_str(), string2.c_str(), MB_OK | MB_SETFOREGROUND);
+        LPCSTR lpParameters = string2.c_str();
+
+
+
+            delete[] encoded_data;
+    CA2W ca3w(LPb64textfile.c_str());
         BOOL res = 0;
-     // res = DeleteFileW(ca3w);
-        ShellExecuteA(NULL, command1, LPFILE, lpParameters, NULL, 0);
+        ShellExecuteA(NULL,command1, LPFILE, lpParameters, NULL, 0);
         int4 = strlen(LPb64textfile.c_str());
         std::string string3 = ".txt";
-     // string1.replace(int4 - 4, 4, string3); //; this crashes the whole of explorer
         IStream* _pStream;
         bool existtxt = 0;
         struct stat buffer;
         int readattempts = 0;
-        while(existtxt == 0 && readattempts < 10) {
+
+        while (readattempts < 10) {
             readattempts++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        existtxt = (stat(LPb64textfile.c_str(), &buffer) == 0);
-        } if(existtxt== 0)
+            existtxt = (stat(LPb64textfile.c_str(), &buffer) == 0);
+
+            if (existtxt) {
+
+                size_t initialSize = buffer.st_size;
+
+                std::this_thread::sleep_for(std::chrono::seconds(2)); // Wait for 2 seconds.
+               // MessageBoxA(NULL, "T.", "Theds.", MB_OK | MB_SETFOREGROUND);
+
+                if (stat(LPb64textfile.c_str(), &buffer) == 0) {
+                    size_t currentSize = buffer.st_size;
+
+                    if (currentSize == initialSize) {
+                        // The file size has not changed for 2 seconds.
+                        // You can proceed with further operations here.
+                       // MessageBoxA(NULL, "The file size has not changed for 2 seconds.", "The file size has not changed for 2 seconds.",MB_OK|MB_SETFOREGROUND);
+                        break;
+                    }
+                }
+            }
+
+            // Wait for 1 second before the next attempt.
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+
+        if (!existtxt || readattempts >= 10) {
+            // The file didn't appear or stopped growing after 10 attempts.
+            // Handle this case accordingly.
             return 1;
+        }
         std::ifstream ifs(LPb64textfile);
         std::string content;
         content.assign((std::istreambuf_iterator<char>(ifs)),
@@ -138,6 +203,43 @@ IFACEMETHODIMP CGimpThumbProvider::Initialize(LPCWSTR pszFilePath, DWORD grfMode
         WStrGlobal = ca2w;
         res = 0;
         int deleteAttempts = 0;
+
+
+        int bufferSize = MultiByteToWideChar(CP_UTF8, 0, LPb64textfile.c_str(), -1, nullptr, 0);
+
+        // Allocate memory for the wide-character string
+        wchar_t* wideString = nullptr; // Initialize to nullptr
+    wideString = new wchar_t[bufferSize];
+
+        // Convert the std::string to LPCWSTR
+        MultiByteToWideChar(CP_UTF8, 0, LPb64textfile.c_str(), -1, wideString, bufferSize);
+
+        // Now, wideString is an LPCWSTR containing the converted string
+
+        // Use wideString as needed (e.g., pass it to Windows API functions)
+        // ...
+
+        // Clean up
+
+
+        //res = DeleteFileW(wideString); crashes explorer below doesnt i dont know why i tried pre post delays
+
+        if (DeleteFileW(wideString)) {
+            // MessageBoxA(NULL, "File deleted successfully.", "Theds.", MB_OK | MB_SETFOREGROUND);
+
+        }
+        else {
+            DWORD error = GetLastError();
+            // Format the error message as a wide-character string
+            wchar_t errorMessage[256];
+            swprintf_s(errorMessage, L"File deletion failed with error code: %lu", error);
+
+            // Display the error message in a message box
+         //   MessageBoxW(NULL, errorMessage, L"Error", MB_ICONERROR | MB_SETFOREGROUND);
+        }
+             delete[] wideString;
+   //MessageBoxA(NULL,(LPCSTR)res, "Theds.", MB_OK | MB_SETFOREGROUND);
+
       //    while (res == 0 && deleteAttempts < 5) {
       //        std::this_thread::sleep_for(std::chrono::milliseconds(800));
       //        res = DeleteFileW(ca3w);
@@ -243,8 +345,7 @@ HRESULT ConvertBitmapSourceTo32BPPHBITMAP(IWICBitmapSource* pBitmapSource, IWICI
                 hr = pBitmapSourceConverted->CopyPixels(&rect, nWidth * 4, nWidth * nHeight * 4, pBits);
                 if (SUCCEEDED(hr)) {
                     *phbmp = hbmp;
-                }
-                else {
+                } else {
                     DeleteObject(hbmp);
                 }
             }

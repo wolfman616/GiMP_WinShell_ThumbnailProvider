@@ -12,6 +12,9 @@
 #include <new>
 #include <winstring.h>
 
+
+
+
 extern HRESULT CGimpThumbProvider_CreateInstance(REFIID riid, void** ppv);
 
 #define SZ_CLSID_GIMPTHUMBHANDLER     L"{50d9450f-2a80-4f08-93b9-2eb526477d1b}"
@@ -167,21 +170,37 @@ STDAPI DllRegisterServer() {
         const REGISTRY_ENTRY rgRegistryEntries[] = {
             // RootKey            KeyName                                                                ValueName                     Data
             {HKEY_CURRENT_USER,   L"Software\\Classes\\CLSID\\" SZ_CLSID_GIMPTHUMBHANDLER,                           NULL,                  SZ_GimpTHUMBHANDLER},
-            {HKEY_CURRENT_USER,   L"Software\\Classes\\CLSID\\" SZ_CLSID_GIMPTHUMBHANDLER,                             L"DisableProcessIsolation",       L"1"}, // Set as REG_DWORD with data 1 (0x1)
+           // {HKEY_CURRENT_USER,   L"Software\\Classes\\CLSID\\" SZ_CLSID_GIMPTHUMBHANDLER,                            L"DisableProcessIsolation",       (PCWSTR)1}, // Set as REG_DWORD with data 1 (0x1)
             {HKEY_CURRENT_USER,   L"Software\\Classes\\CLSID\\" SZ_CLSID_GIMPTHUMBHANDLER L"\\InProcServer32",       NULL,                  szModuleName},
             {HKEY_CURRENT_USER,   L"Software\\Classes\\CLSID\\" SZ_CLSID_GIMPTHUMBHANDLER L"\\InProcServer32",       L"ThreadingModel",     L"Apartment"},
             {HKEY_CURRENT_USER,   L"Software\\Classes\\GIMP2.xcf\\ShellEx\\{e357fccd-a995-4576-b01f-234630154e96}",  NULL,                  SZ_CLSID_GIMPTHUMBHANDLER},
+            {HKEY_CURRENT_USER,   L"Software\\Classes\\.xcf\\ShellEx\\{e357fccd-a995-4576-b01f-234630154e96}",  NULL,                  SZ_CLSID_GIMPTHUMBHANDLER},
         };
 
         hr = S_OK;
         for (int i = 0; i < ARRAYSIZE(rgRegistryEntries) && SUCCEEDED(hr); i++) {
             hr = CreateRegKeyAndSetValue(&rgRegistryEntries[i]);
         }
+        DWORD value = 1;
+        HKEY hKey;
+        DWORD flags = KEY_SET_VALUE;
+        LONG hr = RegOpenKeyEx(HKEY_CURRENT_USER, L"software\\Classes\\CLSID\\" SZ_CLSID_GIMPTHUMBHANDLER, 0, flags, &hKey);
+
+        if ((hr == ERROR_SUCCESS) && (hKey != NULL))
+        {
+            hr = RegSetValueEx(hKey, L"DisableProcessIsolation", 0, REG_DWORD, (const BYTE*)&value, sizeof(value));
+            RegCloseKey(hKey);
+        }
+
+
     } if (SUCCEEDED(hr)) {
         // This tells the shell to invalidate the thumbnail cache.  This is important because any .Gimp files
         // viewed before registering this handler would otherwise show cached blank thumbnails.
         SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
-    } return hr;
+    } 
+    MessageBoxA(NULL, "registered.", "ext handler registered.", MB_OK | MB_SETFOREGROUND);
+
+    return hr;
 }
 
 //     Unregisters this COM server
